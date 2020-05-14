@@ -13,15 +13,17 @@ github url: https://github.com/CS546-FINAL-PROJECT/Bhow-Bhow.git
 First, please `git clone` and `cd` into the project directory. 
 Then with an `npm install` to get the dependencies straightened out.  
 After that, can run our seed to generate the example database.
-Once you have that, start it up with an `npm start` and head on over to `localhost:3000`.  Once there, please click around and explore.
+Once you have that, start it up with an `node app.js` and head on over to `localhost:3000`.  Once there, please click around and explore.
 
 
 ## Core Features
-our origin core features in project propose did not in a good construction and not resonable enough , so we do some changes to have a new Project construction. Now we have a more reasonable designed application after refactoring. 
+Our origin core features in project propose did not in a good construction and not resonable enough , so we do some changes to have a new Project construction. Now we have a more reasonable designed application after refactoring. 
 
 ### Core Features & using guide
 - Main page
-There are Five Modules on homepage
+
+  There are Five Modules on homepage:
+
   1. A picture&content trundle to show users a brief introduction to our website.
   2. RECOMMENDED FOR YOU, show the dogs we choosed to recommend to our users for adoption, and can click "Read More" or "Continue Reading" to see each detailed dog informations.
   3. ALL DOGS AVAILABLE FOR ADOPTION NEAR YOU: Show all the dogs here(we seed have three dogs for example), and click each enter the dog-detail page to see reach information.
@@ -56,11 +58,11 @@ There are Five Modules on homepage
 - ADMIN SYSTEM
  Allow our administrator to login, then enter into the admin system. pLease using following login account to gain access (run seed first)
 
- email: 124@adf.com"
- password: Adfafw12
+#### email: "124@adf.com"  password: "Adfafw12"
 
 
- After enter into the ADMIN SYSTEM, there are four tablelists
+
+ After entering into the ADMIN SYSTEM, there are four tablelists
  (In order to keep security, the manage tables can only be accessed by Url)
  
  1. USER TABLE          localhost:3000:/BhowBhowAdmin/showUsers
