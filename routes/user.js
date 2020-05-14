@@ -8,28 +8,17 @@ const users = require("../data/users");
 // const comments = data.comments;
 
 
-// const checkLogin = require("../middlewares/check").checkLogin;
-// const checkCreatorsLogin = require("../middlewares/check").checkCreatorsLogin;
+const checkUserLogin = require("../middlewares/check").checkUserLogin;
 
-router.get("/", async (req, res) => {
-  // res.send('Questions create Page');
-  // res.json()
-  res.json({ desp: "main page of the user" });
-});
 
 router
   .get("/register", async (req, res) => {
-    // res.send('Questions create Page');
-    // res.json()
-    // res.json({ desp: "register page of the user." });
+
     res.render("Users/user_register")
   })
-  .post("/register", async (req, res) => {
-    // res.send('Questions create Page');
-    // res.json()
-    const advInfo = req.body;
-    // registar(name, password, email, gender, city, state, age)
+  .post("/register",async (req, res) => {
 
+    const advInfo = req.body;
     let name = xss(advInfo.name);
     let password = xss(advInfo.password);
     let email = xss(advInfo.email);
@@ -37,62 +26,41 @@ router
     let city = xss(advInfo.city);
     let state = xss(advInfo.state);
     let age;
-    if (/^\d+$/.test(xss(advInfo.age))) {
-      age = parseInt(xss(advInfo.age));
-    } else {
-      res
-        .status(400)
-        .json({ error: "Please provide an integer." })
-        .end();
-      return;
-    }
+ 
 
     if (!name) {
-      res
-        .status(400)
-        .json({ error: "Please provide the name." })
-        .end();
+      res.render("Users/user_register",{error:"Please provide the name."});
+      return;
+    }
+    if (!email) {
+      res.render("Users/user_register",{error:"Please provide an email."});
       return;
     }
 
     if (!password) {
-      res
-        .status(400)
-        .json({ error: "Please provide the password." })
-        .end();
+      res.render("Users/user_register",{error:"Please provide an password."});
       return;
     }
-    if (!email) {
-      res
-        .status(400)
-        .json({ error: "Please provide the email." })
-        .end();
-      return;
-    }
+
     if (!gender) {
-      res
-        .status(400)
-        .json({ error: "Please provide the gender." })
-        .end();
+      res.render("Users/user_register",{error:"Please provide the gender."});
       return;
     }
     if (!city) {
-      res
-        .status(400)
-        .json({ error: "Please provide the city." })
-        .end();
+      res.render("Users/user_register",{error:"Please provide a city name."});
       return;
     }
     if (!state) {
-      res
-        .status(400)
-        .json({ error: "Please provide the state." })
-        .end();
+      res.render("Users/user_register",{error:"Please provide a state name."});
       return;
     }
-    // console.log(name, password, email, gender, city, state, age);
+    if (/^\d+$/.test(xss(advInfo.age))) {
+      age = parseInt(xss(advInfo.age));
+    } else {
+        res.render("Users/user_register",{error:"Please provide an integer."});
+      return;
+    }
     try {
-      console.log(name, password, email, gender, city, state, age);
       userData = await users.registar(
         name,
         password,
@@ -102,120 +70,81 @@ router
         state,
         age
       );
-      console.log(userData);
-      res.json(userData);
-      res.send({ success: true });
+      req.session.identity = {
+        id: userData._id,
+        identity: "uesr"
+      };
+
+      res.redirect("/BhowBhow");
+
     } catch (e) {
-      res.status(500).json({ error: e });
+      res.render("Users/user_register",{error:e});
+
     }
   });
 
 router
-  .get("/login", async (req, res) => {
-    // res.send('Questions create Page');
-    // res.json()
-    // res.json({ desp: "login page of the user" });
-    res.render("Users/user_login")
+  .get("/login",async (req, res) => {
+
+    res.render("Users/user_login");
   })
-  .post("/login", async (req, res) => {
-    // res.send('Questions create Page');
-    // res.json()
+  .post("/login",async (req, res) => {
+
     const advInfo = req.body;
+
     let email = xss(advInfo.email);
     let password = xss(advInfo.password);
-    // login(email, password);
     if (!email) {
-      res
-        .status(400)
-        .json({ error: "Please provide the email." })
-        .end();
+
+        res.render("Users/user_login",{error:"Please provide the email."});
       return;
     }
 
     if (!password) {
-      res
-        .status(400)
-        .json({ error: "Please provide the password." })
-        .end();
+
+      res.render("Users/user_login",{error:"Please provide the email."});
       return;
     }
 
     try {
       userData = await users.login(email, password);
-      console.log(userData);
+      // console.log(userData);
+
       req.session.identity = {
         id: userData._id,
         identity: "uesr"
       };
-      res.json(userData);
-      res.send({ success: true });
+
+      res.render("Users/user_center.handlebars",{
+        id:userData._id,
+        name:userData.name,
+        email:userData.email,
+        gender:userData.gender,
+        city:userData.city,
+        state:userData.state,
+        age:userData.age,
+        favoriteList:userData.favoriteList
+      })
     } catch (e) {
-      res.status(500).json({ error: e });
+      res.render("Users/user_login",{error:e});
+      // res.status(500).json({ error: e });
     }
   });
+router.get("/favouritelist",checkUserLogin,async(req,res) =>{
+  res.render("Users/User_center_favouritelist");
+})
 
 router
-  .get("/center", async (req, res) => {
+  .get("/center/:id", checkUserLogin,async (req, res) => {
     // res.send('Questions create Page');
     // res.json()
     // res.json({ desp: "center page of the user" });
-    res.render("Users/user_center");
-  })
-  .put("/center", async (req, res) => {
-    // res.send('Questions create Page');
-    // res.json()
-    const advInfo = req.body;
-    let name = xss(advInfo.name);
-    let gender = xss(advInfo.gender);
-    let city = xss(advInfo.city);
-    let state = xss(advInfo.state);
-    let password = xss(advInfo.password);
-    if (!name) {
-      res
-        .status(400)
-        .json({ error: "Please provide your name." })
-        .end();
-      return;
-    }
+    var user = users.getById(req.params.id);
 
-    if (!gender) {
-      res
-        .status(400)
-        .json({ error: "Please provide the gender." })
-        .end();
-      return;
-    }
-    if (!city) {
-      res
-        .status(400)
-        .json({ error: "Please provide the city." })
-        .end();
-      return;
-    }
-    if (!state) {
-      res
-        .status(400)
-        .json({ error: "Please provide the state." })
-        .end();
-      return;
-    }
-    if (!password) {
-      res
-        .status(400)
-        .json({ error: "Please provide the password." })
-        .end();
-      return;
-    }
-    try {
-      usersData = await users.infoUpdate(
-        req.session.identity.id,
-        name, password, gender, city, state, age);
-      res.redirect("/");
-      // res.json(usersData);
-      // res.send({ success: true });
-    } catch (e) {
-      res.status(500).json({ error: e });
-    }
+    res.render("Users/user_center",{name:user.name,
+                      email:user.email,gender:user.gender,
+                      age:user.age,state:user.state,city:user.city
+      });
   });
 
 module.exports = router;

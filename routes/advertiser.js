@@ -7,14 +7,16 @@ const data = require("../data");
 const advertisers = data.advertisers;
 
 // const checkLogin = require("../middlewares/check").checkLogin;
-// const checkCreatorsLogin = require("../middlewares/check").checkCreatorsLogin;
+const checkAdvertiserLoggin = require("../middlewares/check").checkAdvertiserLogin;
+// const logging = require("../middlewares/check").Logging;
 
 router.get("/", async (req, res) => {
   // res.send('Questions create Page');
   // res.json()
-  res.json({ desp: "main page of the advertiser" });
-  // res.render("Advertiser/advertiser_center");
+  // res.json({ desp: "main page of the advertiser" });
+  res.render("Advertiser/advertiser_center");
 });
+
 
 router
   .get("/register", async (req, res) => {
@@ -34,51 +36,36 @@ router
     let address = xss(advInfo.address);
     let password = xss(advInfo.password);
     if (!firstName) {
-      res
-        .status(400)
-        .json({ error: "Please provide the firstName." })
-        .end();
+      res.render("Advertiser/advertiser_register",{error:"Please provide the firstName."});
       return;
     }
 
     if (!lastName) {
-      res
-        .status(400)
-        .json({ error: "Please provide the lastName." })
-        .end();
+      res.render("Advertiser/advertiser_register",{error:"Please provide the lastName."});
       return;
     }
     if (!email) {
-      res
-        .status(400)
-        .json({ error: "Please provide the email." })
-        .end();
-      return;
+      res.render("Advertiser/advertiser_register",{error:"Please provide the email."});
+      return ;
     }
-    if (!cellphone) {
-      res
-        .status(400)
-        .json({ error: "Please provide the cellphone." })
-        .end();
+    if (/^\+?\d{2}[- ]?\d{3}[- ]?\d{5}$/.test(cellphone) && cellphone) {
+      cellphone = parseInt(cellphone);
+    } else  {
+      res.render("Advertiser/advertiser_register",{error:"Invalid cellphone. "});
       return;
     }
     if (!address) {
-      res
-        .status(400)
-        .json({ error: "Please provide the address." })
-        .end();
+      res.render("Advertiser/advertiser_register",{error:"Please provide the address."});
       return;
     }
     if (!password) {
-      res
-        .status(400)
-        .json({ error: "Please provide the password." })
-        .end();
+      res.render("Advertiser/advertiser_register",{error:"Please provide the password."});
       return;
     }
 
     try {
-      advertiserData = await advertisers.registar(
+
+      var advertiserData = await advertisers.registar(
         firstName,
         lastName,
         email,
@@ -86,43 +73,38 @@ router
         address,
         password
       );
+      req.session.identity = {
+        id: advertiserData._id,
+        identity: "uesr"
+      };
       // res.json(advertiserData);
-      res.redirect("/");
+      res.redirect("/BhowBhow");
       // res.send({ success: true });
 
     } catch (e) {
-      res.status(500).json({ error: e });
+      res.render("Advertiser/advertiser_register"),{error:e};
+      // res.status(500).json({ error: e });
     }
   });
 
 router
   .get("/login", async (req, res) => {
-    // res.send('Questions create Page');
-    // res.json()
-    // res.json({ desp: "login page of the advertiser" });
     res.render("Advertiser/advertiser_login");
   })
   .post("/login", async (req, res) => {
-    // res.send('Questions create Page');
-    // res.json()
+
     const advInfo = req.body;
-    console.log(advInfo);
+
     let email = xss(advInfo.email);
     let password = xss(advInfo.password);
-    // login(email, password);
+
     if (!email) {
-      res
-        .status(400)
-        .json({ error: "Please provide the email." })
-        .end();
+      res.render("Advertiser/advertiser_login",{error:"Please provide the email."});
       return;
     }
 
     if (!password) {
-      res
-        .status(400)
-        .json({ error: "Please provide the password." })
-        .end();
+      res.render("Advertiser/advertiser_login",{error:"Please provide the password."});
       return;
     }
 
@@ -132,25 +114,23 @@ router
         id: advertiserData._id,
         identity: "advertiser"
       };
-      res.redirect("/");
-      // res.json(advertiserData);
-      // res.send({ success: true });
+      
+      res.redirect("/BhowBhow/");       //redirect to home page
+
     } catch (e) {
-      res.status(500).json({ error: e });
+      res.render("Advertiser/advertiser_login",{error:e});
+
     }
   });
 
 router
-  .get("/center", async (req, res) => {
-    // res.send('Questions create Page');
-    // res.json()
-    // res.json({ desp: "center page of the advertiser" });
+  .get("/center", checkAdvertiserLoggin,async (req, res) => {
+    // console.log(req.session);
     res.render("Advertiser/advertiser_center");
 
   })
-  .put("/center", async (req, res) => {
-    // res.send('Questions create Page');
-    // res.json()
+  .put("/center", checkAdvertiserLoggin,async (req, res) => {
+
     const advInfo = req.body;
     let firstName = xss(advInfo.firstName);
     let lastName = xss(advInfo.lastName);
@@ -205,11 +185,12 @@ router
         password
       );
       // console.log(advertiserData);
-      res.redirect("/");
+      res.redirect("/BhowBhow");
       // res.json(advertiserData);
       // res.send({ success: true });
     } catch (e) {
-      res.status(500).json({ error: e });
+      res.render("Advertiser/advertiser_center",{error:e});
+      // res.status(500).json({ error: e });
     }
   });
 

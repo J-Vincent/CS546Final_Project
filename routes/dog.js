@@ -1,14 +1,11 @@
 const express = require("express");
 const router = express.Router();
+var ObjectId = require('mongodb').ObjectID;
 
-// const checkLogin = require("../middlewares/check").checkLogin;
-// const checkCandidatesLogin = require("../middlewares/check")
-//   .checkCandidatesLogin;
 
-// const data = require("../data");
-// const questions = data.questions;
-// const quizzes = data.quizzes;
-// const xss = require("xss");
+const data = require("../data");
+const Dog = require("../data/dogs");
+
 
 router.get("/listdogs", async (req, res) => {
   // res.send('Questions create Page');
@@ -16,10 +13,23 @@ router.get("/listdogs", async (req, res) => {
   res.render({ desp: "center page of the advertiser" });
 });
 
+router.get("/astro",async (req,res) =>{
+    res.render("Recommened/astro_details");
+});
+router.get("/zena",async (req,res) =>{
+    res.render("Recommened/zena_details");
+});
+router.get("/sandy",async (req,res) =>{
+    res.render("Recommened/sandy_details");
+});
+router.get("/hamilton",async (req,res) =>{
+    res.render("Recommened/hamilton_details");
+});
+
+
 router
   .get("/adddog", async (req, res) => {
-    // res.send('Questions create Page');
-    // res.json()
+
     res.render({ desp: "center page of the advertiser" });
   })
   .post("/adddog", async (req, res) => {
@@ -44,9 +54,7 @@ router
         res.status(404).json({ message: "not found!" });
     }
 
-    //-------------------------------
-    // res.send('Questions create Page');
-    // res.json()
+
     res.render({ desp: "center page of the advertiser" });
   });
 
@@ -63,54 +71,60 @@ router.post("/search",async function(req,res) {
     var keyword = req.body.keyword.toLowerCase();
     if(req.body.search === "breed")
     {  
-      const dogs = await Dog.listByBreed(keyword);       
-      res.render("Search/dog-search-result",{ dogs:dogs   });       //findby breed
+      const dogs = await Dog.listByBreed(keyword);     
+      res.render("Search/dog-search",{ dogs:dogs  });       //findby breed
     }
     else if(req.body.search === "location"){
         const dogs = await Dog.listByLocation(keyword);    
-        res.render("Search/dog-search-result",{  dogs:dogs    });
+        res.render("Search/dog-search",{  dogs:dogs  });
     }else if(req.body.search === "age"){
         const dogs = await Dog.listByAge(keyword);    
-        res.render("Search/dog-search-result",{  dogs:dogs  });
+        res.render("Search/dog-search",{  dogs:dogs  });
     }
 });
 
 router.get("/breeds",async function(req,res){
     res.render("Mainpage/dog-breeds");
 });
-router.get("/nutrition",async function(req,res){
+router.get("/nutririon",async function(req,res){
   // res.render("Mainpage/");
-    res.render("FeedingGuide/dog-nutrition");
+    res.render("FeedingGuide/dog-nutririon");
 });
 router.get("/problems",async function(req,res){
     res.render("FeedingGuide/dog-problems")
 });
+router.get("/problem1",async function(req,res){
+    res.render("FeedingGuide/problem1");
+});
+router.get("/problem2",async function(req,res){
+    res.render("FeedingGuide/problem2");
+});
 
 
-// router.get("/:id",function (req,res){
-//     try {
-//         const dog =  Dog.getById(req.params.id);
-//         res.render("dogPage",{
-//             breed: dog.breed,
-//             name: dog.name,
-//             age: dog.age,
-//             address: dog.address,
-//             description: dog.description,
-//             vaccine: dog.vaccine,
-//             picture: dog.picture,
-//             postdate: dog.postdate,
-//             color: dog.color,
-//             size: dog.size,
-//             gender: dog.gender
-//         });
-//     }catch(e){
-//         res.status(404).json({ message: "not found!" });
-//     }
-// });
-// router.post("/",function(req,res){
-    
+router.get("/:id",async function (req,res){
+    try {
 
-// });
+        var foundDog =  await Dog.getById(req.params.id);
+        console.log(foundDog);
+        res.render("Mainpage/dog_detail",{
+            breed: foundDog.breed,
+            name: foundDog.name,
+            age: foundDog.age,
+            address: foundDog.address,
+            description: foundDog.description,
+            vaccine: foundDog.vaccine,
+            picture: foundDog.picture,
+            postdate: foundDog.postdate,
+            color: foundDog.color,
+            size: foundDog.size,
+            gender: foundDog.gender,
+            comments:foundDog.comments
+        });
+    }catch(e){
+        res.status(404).json({ message: "not found!" });
+    }
+});
+
 
 router.put("/",function(req,res){
     try {
